@@ -76,3 +76,10 @@ def comments_list(news, author):
         )
         comment.save()
     return comments_list
+
+
+@pytest.fixture
+def form_data():
+    return {
+        'text': 'Новый текст комментария',
+    }
