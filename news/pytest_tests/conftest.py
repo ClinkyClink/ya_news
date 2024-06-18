@@ -1,21 +1,34 @@
 import pytest
+from pytest_lazyfixture import lazy_fixture
 from datetime import timedelta
+
+from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
-
 from django.test.client import Client
 
 from news.models import News, Comment
 
 
+PK = 1
+AUTHOR_NAME = 'Автор'
+USER_NAME = 'Пользователь'
+TITLE = 'Заголовок'
+TEXT = 'Текст новости'
+COMMENT_TEXT = 'Текст комментария'
+ADMIN = lazy_fixture('admin_client')
+AUTHOR = lazy_fixture('author_client')
+CLIENT = lazy_fixture('client')
+
+
 @pytest.fixture
 def author(django_user_model):
-    return django_user_model.objects.create(username='Автор')
+    return django_user_model.objects.create(username=AUTHOR_NAME)
 
 
 @pytest.fixture
 def not_author(django_user_model):
-    return django_user_model.objects.create(username='Не автор')
+    return django_user_model.objects.create(username=USER_NAME)
 
 
 @pytest.fixture
@@ -35,8 +48,8 @@ def not_author_client(not_author):
 @pytest.fixture
 def news():
     news = News.objects.create( 
-        title='Новость',
-        text='Текст новости',
+        title=TITLE,
+        text=TEXT
     )
     return news
 
@@ -47,8 +60,8 @@ def news_list():
     for i in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1):
         news_date = timezone.now() - timedelta(days=i)
         news_item = News.objects.create(
-            title='Новость' + str(i),
-            text='Текст новости' + str(i),
+            title=TITLE + str(i),
+            text=TEXT + str(i),
             date=news_date
         )
         news_items.append(news_item)
@@ -60,7 +73,7 @@ def comment(news, author):
     comment = Comment.objects.create(
         news=news,
         author=author,
-        text='Текст комментария',
+        text=COMMENT_TEXT,
     )
     return comment
 
@@ -71,15 +84,29 @@ def comments_list(news, author):
         comment = Comment.objects.create(
             news=news,
             author=author,
-            text=f'Комментарий {i}',
+            text=f'{COMMENT_TEXT} {i}',
             created=timezone.now() + timedelta(days=i)
         )
         comment.save()
     return comments_list
 
 
-@pytest.fixture
-def form_data():
-    return {
-        'text': 'Новый текст комментария',
-    }
+class URL_NAME:
+    def __init__(self, home, detail, edit, delete, login, logout, signup):
+        self.home = home
+        self.detail = detail
+        self.edit = edit
+        self.delete = delete
+        self.login = login
+        self.logout = logout
+        self.signup = signup
+
+URL = URL_NAME(
+    reverse('news:home'),
+    reverse('news:detail', args=(PK,)),
+    reverse('news:edit', args=(PK,)),
+    reverse('news:delete', args=(PK,)),
+    reverse('users:login'),
+    reverse('users:logout'),
+    reverse('users:signup'),
+)
