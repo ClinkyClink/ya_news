@@ -1,5 +1,4 @@
 import pytest
-from pytest_lazyfixture import lazy_fixture
 from datetime import timedelta
 
 from django.urls import reverse
@@ -10,25 +9,19 @@ from django.test.client import Client
 from news.models import News, Comment
 
 
-PK = 1
-AUTHOR_NAME = 'Автор'
-USER_NAME = 'Пользователь'
 TITLE = 'Заголовок'
 TEXT = 'Текст новости'
 COMMENT_TEXT = 'Текст комментария'
-ADMIN = lazy_fixture('admin_client')
-AUTHOR = lazy_fixture('author_client')
-CLIENT = lazy_fixture('client')
 
 
 @pytest.fixture
 def author(django_user_model):
-    return django_user_model.objects.create(username=AUTHOR_NAME)
+    return django_user_model.objects.create(username='Автор')
 
 
 @pytest.fixture
 def not_author(django_user_model):
-    return django_user_model.objects.create(username=USER_NAME)
+    return django_user_model.objects.create(username='Пользователь')
 
 
 @pytest.fixture
@@ -41,13 +34,13 @@ def author_client(author):
 @pytest.fixture
 def not_author_client(not_author):
     client = Client()
-    client.force_login(not_author) 
+    client.force_login(not_author)
     return client
 
 
 @pytest.fixture
 def news():
-    news = News.objects.create( 
+    news = News.objects.create(
         title=TITLE,
         text=TEXT
     )
@@ -91,22 +84,41 @@ def comments_list(news, author):
     return comments_list
 
 
-class URL_NAME:
-    def __init__(self, home, detail, edit, delete, login, logout, signup):
-        self.home = home
-        self.detail = detail
-        self.edit = edit
-        self.delete = delete
-        self.login = login
-        self.logout = logout
-        self.signup = signup
+@pytest.fixture
+def pk_news(news):
+    return (news.pk,)
 
-URL = URL_NAME(
-    reverse('news:home'),
-    reverse('news:detail', args=(PK,)),
-    reverse('news:edit', args=(PK,)),
-    reverse('news:delete', args=(PK,)),
-    reverse('users:login'),
-    reverse('users:logout'),
-    reverse('users:signup'),
-)
+
+@pytest.fixture
+def home_url():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def detail_url(news):
+    return reverse('news:detail', kwargs={'pk': news.pk})
+
+
+@pytest.fixture
+def edit_url(news):
+    return reverse('news:edit', kwargs={'pk': news.pk})
+
+
+@pytest.fixture
+def delete_url(news):
+    return reverse('news:delete', kwargs={'pk': news.pk})
+
+
+@pytest.fixture
+def login_url():
+    return reverse('users:login')
+
+
+@pytest.fixture
+def logout_url():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def signup_url():
+    return reverse('users:signup')
