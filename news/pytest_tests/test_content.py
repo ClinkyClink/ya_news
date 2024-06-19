@@ -1,8 +1,8 @@
-import pytest
-
 from django.conf import settings
 
 from news.forms import CommentForm
+
+import pytest
 
 
 pytestmark = pytest.mark.django_db

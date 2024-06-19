@@ -1,6 +1,9 @@
 from http import HTTPStatus
+
 import pytest
+
 from pytest_django.asserts import assertRedirects
+
 from pytest_lazyfixture import lazy_fixture
 
 
@@ -39,16 +42,10 @@ def test_pages_available_for_anonymous_user(
 
 
 @pytest.mark.parametrize(
-    'url, login_url, expected_status',
-    [
-        (EDIT_URL, '/auth/login/', HTTPStatus.FOUND),
-        (DELETE_URL, '/auth/login/', HTTPStatus.FOUND)]
+    'url',
+    (EDIT_URL, DELETE_URL),
 )
-def test_redirect_for_anonymous_client(client,
-                                       url,
-                                       login_url,
-                                       comment,
-                                       expected_status):
+def test_redirect_for_anonymous_client(client, url, login_url):
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
-    assertRedirects(response, expected_url, status_code=expected_status)
+    assertRedirects(response, expected_url)

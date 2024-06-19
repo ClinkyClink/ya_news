@@ -1,12 +1,13 @@
-import pytest
 from datetime import timedelta
 
-from django.urls import reverse
-from django.utils import timezone
 from django.conf import settings
 from django.test.client import Client
+from django.urls import reverse
+from django.utils import timezone
 
-from news.models import News, Comment
+from news.models import Comment, News
+
+import pytest
 
 
 TITLE = 'Заголовок'
@@ -82,11 +83,6 @@ def comments_list(news, author):
         )
         comment.save()
     return comments_list
-
-
-@pytest.fixture
-def pk_news(news):
-    return (news.pk,)
 
 
 @pytest.fixture
